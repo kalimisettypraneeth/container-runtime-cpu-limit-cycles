@@ -60,8 +60,9 @@ Mandatory baselines now include:
 - [ ] Forward/backward citation chains from CPU-Limits, Autothrottle, FIRM, and Sinan.
 - [x] Historical epoch self-pacing that smooths bursty budget spending (Currentcy/ECOSystem).
 - [ ] Modern cgroup-specific pacing controllers and artifact-compatible implementations.
-- [ ] Artifact and workload compatibility for each mandatory baseline.
+- [x] Public artifact availability, initial license, and environment constraints inventoried in `research/BASELINE_ARTIFACTS.md`.
+- [ ] Build, smoke, behavioral-conformance, and workload-compatibility verification for selected executable baselines.
 
 ## Gate decision
 
-**NOT COMPLETE.** This table now also rules out novelty claims based on periodic budget replenishment or generic feedback CPU scheduling. Cgroup-specific nonlinear control, backlog recovery/hysteresis, JVM GC/carrier timing, modern pacing, citation-chain searches, and baseline artifact compatibility remain open.
+**NOT COMPLETE.** This table now also rules out novelty claims based on periodic budget replenishment or generic feedback CPU scheduling. Public baseline-artifact availability is inventoried, but cgroup-specific nonlinear control, backlog recovery/hysteresis, JVM GC/carrier timing, modern pacing, citation-chain searches, and baseline build/behavior/workload compatibility remain open.
