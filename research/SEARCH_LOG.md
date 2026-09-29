@@ -23,6 +23,10 @@
 | 2026-09-29 | Real-Time Systems / ECRTS primary records | feedback control real-time scheduling CPU utilization dynamic model transient steady state | peer-reviewed paper and author/repository record | 1999 framework paper + 2002 journal article | Feedback-control scheduling already models uncertain time-varying workloads and regulates CPU/QoS using transient and steady-state specifications. Generic closed-loop CPU scheduling is not novel. |
 | 2026-09-29 | Mechanism synthesis | cgroup CFS bandwidth CBS feedback scheduling multi-period hysteresis | operational discriminator | evidence synthesis | The paper must identify a CFS/cgroup-specific state trajectory and falsifiable predictions not explained by a periodic-server null model or conventional feedback scheduling, then compare against both. |
 
+| 2026-09-29 | GitHub artifact verification | automaxprocs Autothrottle Sinan official repository artifact license environment | repository metadata, README, top-level license, and current-head checks | three public repositories inspected | Uber automaxprocs is an official MIT-licensed implementation. Microsoft Autothrottle is archived, describes a five-Azure-VM reproduction, and had no verified top-level license. Sinan's public artifact requires Google Cloud tooling and at least a 500-CPU project quota; no top-level license was verified. |
+| 2026-09-29 | GitHub artifact search | friendlypool FIRM Currentcy FCS author implementation | targeted title, mechanism, and repository-name queries | no verified maintained author artifacts | Absence in this bounded search is not proof that no artifact exists. Paper-derived controllers must be labeled reimplementations and pass conformance tests. |
+| 2026-09-29 | Artifact synthesis | official repository reproducible CPU controller baseline build smoke workload compatibility | reproducibility gate | inventory in `research/BASELINE_ARTIFACTS.md` | Artifact discovery is not execution evidence. Full microservice managers are not automatically comparable to a single-service controller; require a pinned revision, license, build, environment manifest, smoke result, behavioral check, and compatible workload interface. |
+
 ## Evidence discipline
 
 - Kernel documentation defines mechanism semantics.
@@ -30,4 +34,4 @@
 - Runtime/package documentation constrains claims about container awareness, processor-count ergonomics, and parallelism matching.
 - Historical self-pacing and a recent dynamic worker-pool preprint constrain claims about pacing and thread adaptation; publication status is recorded explicitly.
 - Broad claims about CPU throttling, CPU-limit harm, periodic budget replenishment, generic feedback scheduling, throttle-ratio feedback, or adaptive CPU allocation are rejected.
-- The proposed multi-period limit-cycle/hysteresis regime and damping controller remain **UNVERIFIED** pending cgroup-specific nonlinear control evidence, backlog recovery/hysteresis, JVM GC/carrier timing, modern cgroup pacing-controller, citation chains, and baseline artifact compatibility.
+- The proposed multi-period limit-cycle/hysteresis regime and damping controller remain **UNVERIFIED** pending cgroup-specific nonlinear control evidence, backlog recovery/hysteresis, JVM GC/carrier timing, modern cgroup pacing-controller, citation chains, and baseline build/behavior/workload compatibility.
