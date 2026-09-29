@@ -14,10 +14,16 @@
 | 2026-09-28 | ACM ASPLOS / author paper | Sinan QoS aware resource management microservices CPU | peer-reviewed author-hosted primary paper | ASPLOS 2021 paper + code leads | Sinan establishes data-driven, dependency-aware resource allocation for microservices and end-to-end QoS. |
 | 2026-09-28 | Mechanism synthesis | CPU quota multi-period state trajectory hysteresis arrival phase | operational discriminator | evidence synthesis | A limit-cycle claim now requires multi-period state, controlled up/down sweeps, and separation from arrival-phase alignment and ordinary CFS replenishment. |
 
+| 2026-09-28 | Oracle/OpenJDK documentation | HotSpot UseContainerSupport ActiveProcessorCount CPU quota GC ForkJoinPool | official runtime documentation and issue record | Oracle Java 21 reference + OpenJDK JDK-8146115 | HotSpot container awareness and explicit active-processor overrides already affect GC and ForkJoinPool sizing. Static JVM/container mismatch is established and must be controlled, not claimed. |
+| 2026-09-28 | arXiv full text / DBLP status check | CPU quota thread overcommitment dynamic thread pool neighbour tail latency | mechanism match; publication status recorded | CoRR preprint, not peer reviewed | Jeffery et al. measure quota-related OS-thread overcommitment and present a CPU-usage-driven friendlypool. Dynamic worker adaptation and the latency/throughput tradeoff are substantial overlap. |
+| 2026-09-28 | USENIX ATC archive | epoch budget self pacing burst response time variance resource container | peer-reviewed primary source | USENIX ATC 2003 paper | Currentcy delays tasks that consume budget ahead of epoch progress and reports lower response-time variance than bursty epoch allocation. Pacing a renewable budget is established adjacent work, although not cgroup quota control. |
+| 2026-09-28 | Linux kernel documentation | CFS bandwidth burst slice cpu.max.burst | official kernel source | scheduler documentation | CFS exposes burst accumulation and a tunable runtime-transfer slice in addition to quota/period. Experiments must report period, quota, burst, slice, and cpu.stat rather than attributing every burst to a new controller dynamic. |
+| 2026-09-28 | Mechanism synthesis | JVM quota count friendlypool self pacing limit cycle | operational discriminator | evidence synthesis | A candidate controller must beat static HotSpot processor-count controls and active-worker adaptation, and must distinguish cgroup-specific multi-period dynamics from historical epoch self-pacing. |
 ## Evidence discipline
 
 - Kernel documentation defines mechanism semantics.
 - Peer-reviewed work establishes CPU-limit harm and adaptive resource-management overlap.
-- Runtime/package documentation constrains claims about container awareness and parallelism matching.
+- Runtime/package documentation constrains claims about container awareness, processor-count ergonomics, and parallelism matching.
+- Historical self-pacing and a recent dynamic worker-pool preprint constrain claims about pacing and thread adaptation; publication status is recorded explicitly.
 - Broad claims about CPU throttling, CPU-limit harm, throttle-ratio feedback, or adaptive CPU allocation are rejected.
-- The proposed multi-period limit-cycle/hysteresis regime and damping controller remain **UNVERIFIED** pending control-theory, JVM/runtime, pacing-controller, and citation-chain searches.
+- The proposed multi-period limit-cycle/hysteresis regime and damping controller remain **UNVERIFIED** pending cgroup-specific control theory, JVM GC/carrier timing, modern cgroup pacing-controller, hysteresis, and citation-chain searches.
