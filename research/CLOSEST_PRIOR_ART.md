@@ -1,6 +1,6 @@
 # Closest Prior Art — Container Runtime CPU-Limit Cycles
 
-Review date: 2026-09-28  
+Review date: 2026-09-29  
 Status: **EVIDENCE TABLE IN PROGRESS — NOVELTY UNVERIFIED**
 
 Overlap taxonomy: `DIRECT`, `SUBSTANTIAL`, `PARTIAL`, `ADJACENT`, `FOUNDATIONAL`, `NONE IDENTIFIED`.
@@ -8,6 +8,8 @@ Overlap taxonomy: `DIRECT`, `SUBSTANTIAL`, `PARTIAL`, `ADJACENT`, `FOUNDATIONAL`
 | Work | Year / venue | Research question or mechanism | Workload / setting | Metrics or decision signals | Artifact / primary source | Overlap | Exact differentiation still requiring proof |
 |---|---|---|---|---|---|---|---|
 | Linux CFS Bandwidth Control | kernel documentation | Enforce group CPU bandwidth using quota over a period; throttle after quota assignment is exhausted until replenishment | CFS task groups / cgroups | quota, period, throttled state and statistics | https://docs.kernel.org/scheduler/sched-bwc.html | FOUNDATIONAL | Period-aligned throttle/replenish is not a novel limit cycle. A contribution needs a distinct multi-period state trajectory or hysteresis. |
+| Constant Bandwidth Server and Linux SCHED_DEADLINE | 1998 onward / real-time scheduling and Linux | Reserve CPU using runtime, deadline, and period parameters; replenish depleted runtime and preserve temporal isolation for variable execution demand | Real-time tasks and Linux deadline scheduling | remaining runtime, replenishment time, deadline, period, admission bandwidth | Linux kernel documentation: https://docs.kernel.org/scheduler/sched-deadline.html | FOUNDATIONAL | Periodic budget reservation, depletion, and replenishment are established. The candidate must not relabel a periodic server as a cgroup limit cycle; it must identify CFS/cgroup-specific state and predictions that CBS does not explain. |
+| Feedback Control Real-Time Scheduling: Framework, Modeling, and Algorithms | 2002 / Real-Time Systems; framework introduced at ECRTS 1999 | Model real-time scheduling as a dynamic system and use feedback to control CPU utilization and QoS under uncertain, time-varying workloads | Soft real-time systems with variable execution demand | utilization, deadline-miss behavior, transient and steady-state response | DOI 10.1023/A:1015398403337; repository record https://doi.org/10.18130/V3S31K | SUBSTANTIAL | Closed-loop CPU scheduling and transient/steady-state controller design are established. Novelty requires a cgroup-specific nonlinear or multi-period mechanism, operational falsifiers, and comparison with an FCS-style controller rather than generic feedback-control claims. |
 | CPU-Limits kill Performance: Time to rethink Resource Control | 2025 / ACM SoCC | Whether CPU limits are necessary and beneficial for latency-sensitive cloud-native applications | Cloud-native latency-sensitive applications | performance, resource waste, SLO violations, cost implications | DOI 10.1145/3772052.3772219; preprint https://arxiv.org/abs/2510.10747 | DIRECT | Broad CPU-limit harm is established. The remaining claim must be temporal regime characterization and control, not another harm demonstration. |
 | HotSpot container awareness and `ActiveProcessorCount` | JDK 10+ / Oracle and OpenJDK documentation | Detect container CPU/memory limits and use an effective processor count for runtime ergonomics; allow an explicit CPU-count override | Java applications in Linux containers | active processor count used to size GC and ForkJoinPool-related thread pools | Oracle Java 21 command reference: https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html; OpenJDK JDK-8146115: https://bugs.openjdk.org/browse/JDK-8146115 | DIRECT | JVM quota awareness and processor-count-controlled runtime pools are established. Experiments must include default `UseContainerSupport`, explicit `ActiveProcessorCount`, GC configuration, and actual carrier/worker counts; a static runtime mismatch is not the claimed cycle. |
 | Reducing Tail Latencies Through Environment- and Neighbour-aware Thread Management | 2024 / CoRR preprint (not peer reviewed) | Quantify OS-thread overcommitment under CPU quotas and neighbours; dynamically scale active worker threads from observed CPU usage | Rust/Go/Java and lightweight-thread runtimes on Linux cgroups | queue/worker latency, throughput, thread count, CPU usage; 10 ms controller interval | https://arxiv.org/abs/2407.11582 | SUBSTANTIAL | Quota-to-thread mismatch, latency/throughput tradeoffs, and dynamic worker-pool adaptation are already demonstrated. The paper must separate its multi-period quota/backlog regime from ordinary thread overcommitment and compare against active-thread control. |
@@ -32,11 +34,13 @@ A claimed **multi-period limit cycle or hysteresis** must satisfy all of the fol
 
 ## Current synthesis
 
-Broad claims about CPU-limit harm, throttling, runtime mismatch, throttle-ratio feedback, or adaptive CPU allocation are unsafe. The viable candidate is narrower: demonstrate and operationally distinguish a persistent multi-period dynamic regime caused by quota, backlog, burstiness, and runtime scheduling, then show that a controller damps it better than established baselines.
+Broad claims about CPU-limit harm, throttling, runtime mismatch, periodic budget depletion/replenishment, generic feedback scheduling, throttle-ratio feedback, or adaptive CPU allocation are unsafe. CBS/SCHED_DEADLINE provides the periodic-server null model, while feedback-control real-time scheduling establishes closed-loop CPU/QoS regulation. The viable candidate is narrower: demonstrate and operationally distinguish a persistent CFS/cgroup-specific multi-period regime caused by quota, backlog, burstiness, and runtime scheduling that those established models do not predict, then show that a controller damps it better than established baselines.
 
 Mandatory baselines now include:
 
 - ordinary CFS quota behavior;
+- a CBS/SCHED_DEADLINE-inspired periodic-budget null model, with explicit runtime/period/replenishment predictions;
+- an FCS-style utilization/QoS feedback controller or a documented reason it cannot be implemented comparably;
 - Go 1.25 container-aware GOMAXPROCS or runtime-equivalent settings;
 - Uber automaxprocs where applicable;
 - static quota/parallelism configurations, including HotSpot default container support and explicit `ActiveProcessorCount` sweeps;
@@ -47,7 +51,9 @@ Mandatory baselines now include:
 
 ## Remaining searches before gate completion
 
-- [ ] Explicit control-theoretic analyses of cgroup/CFS bandwidth dynamics.
+- [x] Foundational periodic CPU-budget/resource-reservation theory and Linux CBS implementation semantics.
+- [x] General feedback-control real-time scheduling and dynamic CPU-utilization control.
+- [ ] Cgroup/CFS-bandwidth-specific control models, backlog recovery, and hysteresis.
 - [ ] Backlog recovery and hysteresis under CPU quotas.
 - [x] JVM container processor-count ergonomics and dynamic worker-pool overlap (Oracle/OpenJDK plus friendlypool preprint).
 - [ ] JVM GC and carrier-thread interaction with quota timing, beyond static processor-count awareness.
@@ -58,4 +64,4 @@ Mandatory baselines now include:
 
 ## Gate decision
 
-**NOT COMPLETE.** This table rules out broad CPU-limit and adaptive-resource claims, but cgroup-specific control theory, JVM GC/carrier timing, modern pacing, hysteresis, and citation-chain searches remain open.
+**NOT COMPLETE.** This table now also rules out novelty claims based on periodic budget replenishment or generic feedback CPU scheduling. Cgroup-specific nonlinear control, backlog recovery/hysteresis, JVM GC/carrier timing, modern pacing, citation-chain searches, and baseline artifact compatibility remain open.
