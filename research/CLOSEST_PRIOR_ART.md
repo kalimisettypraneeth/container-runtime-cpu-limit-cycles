@@ -19,6 +19,9 @@ Overlap taxonomy: `DIRECT`, `SUBSTANTIAL`, `PARTIAL`, `ADJACENT`, `FOUNDATIONAL`
 | Autothrottle: A Practical Bi-Level Approach to Resource Management for SLO-Targeted Microservices | 2024 / USENIX NSDI | Translate application SLO feedback into per-service CPU throttle-ratio targets | Three microservice applications with production workload traces | end-to-end latency/SLO, CPU savings, service throttle ratios | Paper: https://www.usenix.org/conference/nsdi24/presentation/wang-zibo; code: https://github.com/microsoft/autothrottle | DIRECT | CPU throttle ratios as feedback signals and controlled targets are established. A damping controller must distinguish the proposed dynamic regime and compare with bi-level control. |
 | FIRM: An Intelligent Fine-grained Resource Management Framework for SLO-Oriented Microservices | 2020 / USENIX OSDI | Identify critical microservices and adjust fine-grained resources to meet SLOs efficiently | Four microservice benchmarks | SLO violations and requested CPU limits, among resource-management metrics | https://www.usenix.org/conference/osdi20/presentation/qiu | SUBSTANTIAL | Fine-grained CPU/SLO resource control is established; novelty cannot rest on dynamically tuning CPU limits alone. |
 | Sinan: ML-Based and QoS-Aware Resource Management for Cloud Microservices | 2021 / ACM ASPLOS | Use data-driven models to allocate resources across dependent microservices while meeting QoS | Cloud microservice applications with tier dependencies | end-to-end tail latency/QoS and resource allocation | Author paper: https://people.csail.mit.edu/delimitrou/papers/2021.asplos.sinan.pdf; code leads: https://github.com/zyqCSL/sinan-gcp | SUBSTANTIAL | Dependency-aware, data-driven CPU allocation is established. A new claim must target quota/runtime temporal dynamics, not generic QoS-aware allocation. |
+| Cilantro: Performance-Aware Resource Allocation for General Objectives via Online Feedback | 2023 / USENIX OSDI | Learn performance/resource mappings online and allocate resources for general objectives | Cluster and microservice workloads | utility/performance feedback and allocation | https://www.usenix.org/conference/osdi23/presentation/bhardwaj | SUBSTANTIAL | Online feedback allocation is established. CPU-Limits identifies that Cilantro's model assumes allocation bounds; the candidate cannot claim generic performance-feedback allocation. |
+| Ursa: Analytically-Driven Resource Management for Cloud-Native Microservices | 2024 / arXiv preprint | Decompose end-to-end SLA into per-service targets and resource allocations with lightweight analytical models | Social network, media, and video-processing microservices | SLA violations, CPU allocation, control-plane/data-collection cost | https://arxiv.org/abs/2401.02920 | SUBSTANTIAL | Ursa explicitly compares with Sinan and FIRM. Analytical SLA decomposition and rapid per-service resource exploration are established; they do not establish the claimed CFS multi-period regime. |
+| OpenJDK cgroup CPU-count semantics | 2021 onward / OpenJDK runtime records | Derive effective processor count from cgroup quota/shares and use it to size GC, compiler, and ForkJoin-related pools | HotSpot in cgroup environments | effective CPU count and derived runtime-pool sizing | OpenJDK review record: https://mail.openjdk.org/pipermail/hotspot-runtime-dev/2021-March/046629.html; Oracle `ActiveProcessorCount` documentation | DIRECT | Quota-aware JVM sizing and its ambiguity under elastic request/limit configurations are established. A temporal claim must measure GC/compiler/worker/carrier activity relative to quota periods; static sizing evidence is insufficient. |
 
 ## Operational discriminator
 
@@ -49,20 +52,24 @@ Mandatory baselines now include:
 - Autothrottle-style CPU throttle-ratio control;
 - no-limit/request-only configurations where methodologically valid.
 
+## Bounded chain and mechanism-search result
+
+Backward chaining from CPU-Limits identifies FIRM, Cilantro, Autothrottle, Ursa, SHOWAR, Erlang, and autoscaling work as CPU-limit-dependent resource-management predecessors. A forward/adjacent chain through Ursa links Sinan and FIRM as representative learned resource managers. Targeted primary-source and official-runtime searches found processor-count/runtime-pool coupling, one-period CFS/CBS budget semantics, burst accumulation, worker adaptation, and feedback allocation. They did **not identify** a primary source that directly models the proposed CFS/cgroup-specific multi-period backlog hysteresis or a HotSpot GC/carrier-to-quota phase loop. This is a bounded search result, not proof that no such work exists and not evidence of novelty.
+
 ## Remaining searches before gate completion
 
 - [x] Foundational periodic CPU-budget/resource-reservation theory and Linux CBS implementation semantics.
 - [x] General feedback-control real-time scheduling and dynamic CPU-utilization control.
-- [ ] Cgroup/CFS-bandwidth-specific control models, backlog recovery, and hysteresis.
-- [ ] Backlog recovery and hysteresis under CPU quotas.
+- [x] Bounded cgroup/CFS-bandwidth-specific control, backlog-recovery, and hysteresis search completed; no direct primary-source mechanism match identified, without treating that negative result as proof.
+- [x] Backlog-recovery and up/down-sweep literature search reconciled into explicit falsifiers; empirical evidence remains future experiment work.
 - [x] JVM container processor-count ergonomics and dynamic worker-pool overlap (Oracle/OpenJDK plus friendlypool preprint).
-- [ ] JVM GC and carrier-thread interaction with quota timing, beyond static processor-count awareness.
-- [ ] Forward/backward citation chains from CPU-Limits, Autothrottle, FIRM, and Sinan.
+- [x] Official JVM GC/compiler/ForkJoin sizing interaction with cgroup-derived processor count reviewed; no direct primary evidence for a quota-phase GC/carrier loop identified, so that mechanism remains an experiment hypothesis.
+- [x] Backward/adjacent citation chains from CPU-Limits, Autothrottle, FIRM, Sinan, Cilantro, and Ursa reconciled; bounded forward searching is logged and does not establish exhaustiveness.
 - [x] Historical epoch self-pacing that smooths bursty budget spending (Currentcy/ECOSystem).
-- [ ] Modern cgroup-specific pacing controllers and artifact-compatible implementations.
+- [x] Modern cgroup pacing/burst search reconciled: kernel burst/slice semantics and Autothrottle-style control are established, but no maintained directly compatible cgroup-phase pacing artifact was verified.
 - [x] Public artifact availability, initial license, and environment constraints inventoried in `research/BASELINE_ARTIFACTS.md`.
 - [ ] Build, smoke, behavioral-conformance, and workload-compatibility verification for selected executable baselines.
 
 ## Gate decision
 
-**NOT COMPLETE.** This table now also rules out novelty claims based on periodic budget replenishment or generic feedback CPU scheduling. Public baseline-artifact availability is inventoried, but cgroup-specific nonlinear control, backlog recovery/hysteresis, JVM GC/carrier timing, modern pacing, citation-chain searches, and baseline build/behavior/workload compatibility remain open.
+**NOT COMPLETE.** The bounded mechanism and citation-chain searches are now reconciled and narrow the hypothesis without proving novelty. The gate remains open because selected baselines have not yet passed fresh zero-cost build, smoke, behavioral-conformance, and common-workload checks. No experiment-design or implementation work may start until that executable-baseline evidence is committed and read back.
